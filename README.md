@@ -2,6 +2,25 @@
 ## Introduction
 This project was created in order to strengthen my skills and applications of SQL’s Window functions in a real-world context. The investigation conducted involves a 5-table database containing operational details of a shopping center. This includes employee, sales, and operational data.
 
+## Guiding Questions
+- How do individual employee salaries differ between departments?
+- Max Min?
+- Rank?
+- Running Totals and Running Averages
+
+- What are customer purchase habits?
+  - Purchases based on:
+  - Departments
+  - Quantities
+  - Shipping Modes
+  
+- How are sales outcomes tied to customer purchasing habits?
+  - Profits/Sales numbers based on:
+  - Department
+  - Division
+  - Shipping Mode
+  - Yearly Trends
+
 > ## Dataset Table Columns
 > ### Customers
 >
@@ -52,21 +71,4 @@ This project was created in order to strengthen my skills and applications of SQ
 > - discount	The discount rate applied to the order
 > - profit	The overall profits gained from the order
 
-Guiding Questions
-- How do individual employee salaries differ between departments?
-- Max Min?
-- Rank?
-- Running Totals and Running Averages
 
-- What are customer purchase habits?
-  - Purchases based on:
-  - Departments
-  - Quantities
-  - Shipping Modes
-  
-- How are sales outcomes tied to customer purchasing habits?
-  - Profits/Sales numbers based on:
-  - Department
-  - Division
-  - Shipping Mode
-  - Yearly Trends
