@@ -1,0 +1,954 @@
+############################# ############################# #############################
+-- Window Function Customer, Employee, Sales Data Analysis
+############################# ############################# #############################
+
+-- Retrieve all the data in the projectdb database
+
+SELECT *
+FROM employees;
+
+SELECT *
+FROM departments;
+
+SELECT *
+FROM regions;
+
+SELECT *
+FROM customers;
+
+SELECT *
+FROM sales;
+
+
+############################# ############################# #############################
+-- Task 1
+-- ROW_NUMBER()
+-- Investigating Employee and HR related data
+#############################  ############################# #############################
+
+-- 1.1
+-- ROW_NUMBER()
+-- Retrieve a list of employee_id, first_name, hire_date,
+-- and department of all employees ordered by the hire date
+
+SELECT employee_id,
+	first_name,
+	department,
+	hire_date,
+	ROW_NUMBER() OVER (ORDER BY hire_date) AS row_n
+FROM employees;
+
+
+
+
+**********************************************************************************************************************
+
+
+employee_id first_name                                         department        hire_date  row_n
+----------- -------------------------------------------------- ----------------- ---------- --------------------
+271         Norbie                                             First Aid         2003-01-01 1
+300         Cassandra                                          Beauty            2003-01-01 2
+79          Rora                                               Children Clothing 2003-01-12 3
+
+**********************************************************************************************************************
+
+
+-- 1.2
+-- ROW_NUMBER() PARTITION BY
+-- Retrieve the employee_id, first_name,
+-- hire_date of employees for different departments
+
+SELECT employee_id,
+	first_name,
+	department,
+	hire_date,
+	ROW_NUMBER() OVER (PARTITION BY department
+						ORDER BY hire_date) AS row_n
+FROM employees;
+
+**********************************************************************************************************************
+
+
+employee_id first_name                                         department        hire_date  row_n
+----------- -------------------------------------------------- ----------------- ---------- --------------------
+927         Maryellen                                          Automotive        2003-04-19 1
+840         Archibold                                          Automotive        2003-04-26 2
+988         Tabb                                               Automotive        2003-05-02 3
+648         Abbott                                             Automotive        2003-06-05 4
+305         Ladonna                                            Automotive        2003-08-10 5
+
+
+
+
+**********************************************************************************************************************
+
+
+############################# ############################# #############################
+-- Task 2
+-- RANK()
+-- 2.1 - 2.3 Investigating Employee Salary
+-- 2.4 Investigating Customer Purchases
+############################# ############################# #############################
+
+-- 2.1
+-- RANK() PARTITION BY
+-- Retrieve a list of employees ordered by rank by department for salary
+
+SELECT first_name,
+	email,
+	department,
+	salary,
+	RANK() OVER (PARTITION BY department
+				ORDER BY salary DESC) AS pos
+FROM employees;
+
+**********************************************************************************************************************
+
+
+first_name                                         email                                              department        salary      pos
+-------------------------------------------------- -------------------------------------------------- ----------------- ----------- --------------------
+Mill                                               NULL                                               Automotive        162522      1
+Irita                                              istarie2h@answers.com                              Automotive        160783      2
+Tammie                                             NULL                                               Automotive        160039      3
+Roslyn                                             rguiu3h@com.com                                    Automotive        157260      4
+Betsey                                             breedshawc5@phoca.cz                               Automotive        152141      5
+
+
+
+
+**********************************************************************************************************************
+
+
+
+-- 2.2
+-- RANK() WHERE
+-- Retrieve the hire_date. Return details of employees hired on or before
+-- 31st Dec, 2005 and are in First Aid, Movies and Computers departments
+
+SELECT first_name,
+	email,
+	department,
+	salary,
+	hire_date,
+	RANK() OVER (PARTITION BY department
+					ORDER BY salary DESC) AS pos
+FROM employees
+WHERE hire_date <= '2005-12-31'
+	AND department IN ('First_Aid','Movies','Computers');
+	
+
+**********************************************************************************************************************
+
+
+first_name                                         email                                              department        salary      hire_date  pos
+-------------------------------------------------- -------------------------------------------------- ----------------- ----------- ---------- --------------------
+Parnell                                            pdavidoff8i@zimbio.com                             Computers         155000      2004-03-29 1
+Webb                                               NULL                                               Computers         152504      2005-10-13 2
+Javier                                             jrosendale98@ca.gov                                Computers         87199       2003-11-12 3
+Retha                                              rdebneyak@indiegogo.com                            Computers         74771       2004-06-29 4
+Feliks                                             fmorffew4@a8.net                                   Computers         55307       2003-01-14 5
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+-- 2.3
+-- RANK() Sub-Select
+-- Retrieve the top 5 ranked salary for each department
+
+SELECT *
+FROM
+	(SELECT first_name, last_name,
+			email,
+			department,
+			salary,
+			hire_date,
+			RANK() OVER (PARTITION BY department
+							ORDER BY salary DESC) AS pos
+		FROM employees) AS ss
+WHERE pos <= 5;
+
+
+
+**********************************************************************************************************************
+
+
+first_name                                         last_name                                          email                                              department        salary      hire_date  pos
+-------------------------------------------------- -------------------------------------------------- -------------------------------------------------- ----------------- ----------- ---------- --------------------
+Mill                                               Makey                                              NULL                                               Automotive        162522      2011-01-08 1
+Irita                                              Starie                                             istarie2h@answers.com                              Automotive        160783      2004-10-15 2
+Tammie                                             Grishukov                                          NULL                                               Automotive        160039      2011-12-08 3
+Roslyn                                             Guiu                                               rguiu3h@com.com                                    Automotive        157260      2003-08-11 4
+Betsey                                             Reedshaw                                           breedshawc5@phoca.cz                               Automotive        152141      2012-02-10 5
+Orland                                             Backhouse                                          obackhouse1n@yahoo.co.jp                           Beauty            162845      2007-07-12 1
+Urban                                              Conwell                                            uconwelll7@multiply.com                            Beauty            162169      2015-02-23 2
+Baxter                                             Grahlman                                           NULL                                               Beauty            154018      2006-07-18 3
+Neddy                                              Speachley                                          nspeachley73@washington.edu                        Beauty            151926      2007-04-26 4
+
+
+
+**********************************************************************************************************************
+
+
+
+
+############################# ############################# #############################
+-- Task 3
+-- NTILE() Paging
+-- Investigating Employee Salaries
+############################# ############################# #############################
+
+-- 3.1: Grouping
+-- Group the employees table into five groups based on the order of their salaries
+
+SELECT first_name,
+	department,
+	salary,
+	NTILE(5) OVER (ORDER BY salary DESC)
+FROM employees;
+
+
+
+**********************************************************************************************************************
+
+
+
+
+
+first_name                                         department        salary      
+-------------------------------------------------- ----------------- ----------- --------------------
+Jacklyn                                            Clothing          166976      1
+Carissa                                            Music             166765      1
+Riley                                              Camping           166569      1
+Lauren                                             Pharmacy          166016      1
+
+
+Stacee                                             First Aid         136707      1
+Juan                                               Device Repair     136597      1
+Dalli                                              First Aid         136545      2
+Jeane                                              Pharmacy          136466      2
+Eilis                                              Toys              136130      2
+Lilli                                              Cosmetics         136056      2
+Nadia                                              Vitamins          136017      2
+
+
+
+Sydney                                             Clothing          95313       3
+Stanislaw                                          Toys              95290       3
+Rodrique                                           Children Clothing 95051       3
+Kristoffer                                         Jewelry           94938       3
+Damiano                                            Books             94781       3
+Stefano                                            Cosmetics         94751       3
+Devondra                                           First Aid         94635       3
+Curtice                                            Device Repair     94233       3
+
+
+
+...
+
+
+**********************************************************************************************************************
+
+
+
+-- 3.2 
+-- NTILE Multiple Grouping
+-- Group the employees into various group splits
+
+SELECT first_name,
+	department,
+	salary,
+	NTILE(5) OVER (ORDER BY salary DESC) g1,
+	NTILE(10) OVER (ORDER BY salary DESC) g2,
+	NTILE(100) OVER (ORDER BY salary DESC) g3
+FROM employees;
+
+
+
+**********************************************************************************************************************
+
+
+
+
+
+first_name                                         department        salary      g1                   g2                   g3
+-------------------------------------------------- ----------------- ----------- -------------------- -------------------- --------------------
+Jacklyn                                            Clothing          166976      1                    1                    1
+Carissa                                            Music             166765      1                    1                    1
+Riley                                              Camping           166569      1                    1                    1
+Lauren                                             Pharmacy          166016      1                    1                    1
+Lucy                                               Sports            165660      1                    1                    1
+Barby                                              Clothing          164588      1                    1                    1
+Ev                                                 Grocery           164582      1                    1                    1
+Sherwynd                                           Sports            164470      1                    1                    1
+Michail                                            Device Repair     164355      1                    1                    1
+Hermione                                           Music             164219      1                    1                    1
+Rob                                                First Aid         164011      1                    1                    2
+Elvera                                             Vitamins          163933      1                    1                    2
+Hendrik                                            Jewelry           163794      1                    1                    2
+Zeke                                               Toys              163688      1                    1                    2
+Brandise                                           Computers         163512      1                    1                    2
+Bunny                                              Garden            163361      1                    1                    2
+Orsa                                               First Aid         163239      1                    1                    2
+Kerstin                                            Grocery           162926      1                    1                    2
+Paxon                                              Pharmacy          162924      1                    1                    2
+Orland                                             Beauty            162845      1                    1                    2
+Mill                                               Automotive        162522      1                    1                    3
+Cal                                                Cosmetics         162454      1                    1                    3
+Josselyn                                           Music             162341      1                    1                    3
+
+
+
+**********************************************************************************************************************
+-- 3.3
+-- NTILE() PARTITION BY
+-- Group the employees table into five groups for
+-- each department based on the order of their salaries
+
+SELECT first_name,
+	email,
+	department,
+	salary,
+	NTILE(5) OVER (PARTITION BY department
+				  	ORDER BY salary DESC)
+FROM employees;
+
+
+
+**********************************************************************************************************************
+
+
+
+first_name                                         email                                              department        salary      
+-------------------------------------------------- -------------------------------------------------- ----------------- ----------- --------------------
+Mill                                               NULL                                               Automotive        162522      1
+Irita                                              istarie2h@answers.com                              Automotive        160783      1
+Tammie                                             NULL                                               Automotive        160039      1
+Roslyn                                             rguiu3h@com.com                                    Automotive        157260      1
+Betsey                                             breedshawc5@phoca.cz                               Automotive        152141      1
+Cherianne                                          NULL                                               Automotive        150821      1
+Chrissy                                            cappletonlq@census.gov                             Automotive        146522      1
+Poppy                                              plinesn7@gmpg.org                                  Automotive        144511      2
+Cy                                                 cmenceft@icq.com                                   Automotive        144146      2
+Jilleen                                            NULL                                               Automotive        137393      2
+Merlina                                            NULL                                               Automotive        137094      2
+Charis                                             cbradbornejp@scribd.com                            Automotive        130995      2
+Stormy                                             NULL                                               Automotive        126983      2
+Noelyn                                             ndemarchiiy@slashdot.org                           Automotive        125305      2
+Cybil                                              cperezea@a8.net                                    Automotive        123828      3
+Lorelle                                            lkelberman7l@wired.com                             Automotive        119959      3
+Maryellen                                          mwestnedgepq@guardian.co.uk                        Automotive        115973      3
+Ladonna                                            lmccrow8g@nhs.uk                                   Automotive        111775      3
+Ivie                                               iaubreykx@google.es                                Automotive        111359      3
+Abbott                                             amundowhz@prlog.org                                Automotive        106517      3
+Doe                                                dlarkworthyao@amazon.de                            Automotive        106046      4
+Vanda                                              vmarwickm@upenn.edu                                Automotive        103570      4
+Clementina                                         cfrankcombec1@foxnews.com                          Automotive        95492       4
+Jessalyn                                           jhorleycn@bluehost.com                             Automotive        86929       4
+Lauretta                                           lroundsa6@wordpress.org                            Automotive        75978       4
+Archibold                                          adeelynb@fda.gov                                   Automotive        69379       4
+Katlin                                             kbemroseg1@webs.com                                Automotive        60089       5
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+-- 3.4 
+-- CTE Grouping
+-- Group employees into 5 groups based on the order of their salary
+-- Find the average salary for each group of employees
+
+WITH salary_ranks AS
+	(SELECT first_name,
+			email,
+			department,
+			salary,
+			NTILE(5) OVER (ORDER BY salary DESC) AS rank_of_salary
+		FROM employees)
+SELECT rank_of_salary,
+	ROUND(AVG(salary), 2) AS avg_salary
+FROM salary_ranks
+GROUP BY rank_of_salary
+ORDER BY rank_of_salary;
+
+
+
+**********************************************************************************************************************
+
+rank_of_salary       avg_salary
+-------------------- -----------
+1                    151647
+2                    119197
+3                    90135
+4                    62086
+5                    34790
+
+
+
+**********************************************************************************************************************
+
+
+############################# ############################# #############################
+-- Task 4 
+-- Aggregate Window Functions - Part One
+-- COUNT, SUM
+############################# ############################# #############################
+
+-- 4.1 
+-- COUNT() PARTITION BY
+-- Retrieve the first names, department and
+-- number of employees working in that department
+
+SELECT first_name,
+	department,
+	COUNT(*) OVER (PARTITION BY department) AS dept_count
+FROM employees;
+
+
+**********************************************************************************************************************
+
+
+first_name                                         department        dept_count
+-------------------------------------------------- ----------------- -----------
+Vanda                                              Automotive        32
+Irita                                              Automotive        32
+Jilleen                                            Automotive        32
+Roslyn                                             Automotive        32
+
+...
+
+Colby                                              Toys              47
+Archibald                                          Toys              47
+Sigismund                                          Toys              47
+Mikael                                             Vitamins          37
+Tobi                                               Vitamins          37
+Cary                                               Vitamins          37
+
+...
+
+
+**********************************************************************************************************************
+
+
+
+-- 4.2 
+-- SUM()
+-- Total Salary for all employees
+
+SELECT first_name,
+	department,
+	hire_date,
+	SUM(salary) OVER (ORDER BY hire_date) AS total_salary
+FROM employees;
+
+
+**********************************************************************************************************************
+
+first_name                                         department        hire_date  total_salary
+-------------------------------------------------- ----------------- ---------- ------------
+Norbie                                             First Aid         2003-01-01 189151
+Cassandra                                          Beauty            2003-01-01 189151
+Rora                                               Children Clothing 2003-01-12 342640
+Feliks                                             Computers         2003-01-14 397947
+Cecilius                                           Vitamins          2003-01-20 496829
+Eugenius                                           Toys              2003-01-26 648947
+Fiorenze                                           Phones & Tablets  2003-02-17 700213
+
+
+...
+
+
+Eloisa                                             Clothing          2016-12-02 91125583
+Edik                                               Tools             2016-12-11 91213961
+Roxie                                              Phones & Tablets  2016-12-16 91256185
+Cherianne                                          Automotive        2016-12-18 91407006
+Barby                                              Clothing          2016-12-26 91571594
+
+(1000 rows affected)
+
+
+
+
+
+**********************************************************************************************************************
+
+
+-- 4.3
+-- SUM() PARTITION BY
+-- Total Salary for each department
+
+SELECT first_name,
+	department,
+	hire_date,
+	salary,
+	SUM(salary) OVER (PARTITION BY department) AS total_salary
+FROM employees;
+
+
+
+
+**********************************************************************************************************************
+
+
+
+first_name                                         department        hire_date  salary      total_salary
+-------------------------------------------------- ----------------- ---------- ----------- ------------
+Laurie                                             Automotive        2007-05-31 29752       3553477
+Maryellen                                          Automotive        2003-04-19 115973      3553477
+Merlina                                            Automotive        2009-02-16 137094      3553477
+Tabb                                               Automotive        2003-05-02 47591       3553477
+Rhianna                                            Beauty            2005-04-07 120753      4341935
+Carlyle                                            Beauty            2010-06-29 141315      4341935
+
+
+
+
+
+
+
+
+**********************************************************************************************************************
+
+-- 4.4
+-- Total Salary for each department order running total by hire_date
+-- Created Running_total column for each department
+
+SELECT first_name,
+	hire_date,
+	department,
+	salary,
+	SUM(salary) OVER (PARTITION BY department
+					 	ORDER BY hire_date) AS running_total
+FROM employees;
+
+
+
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+first_name                                         hire_date  department        salary      running_total
+-------------------------------------------------- ---------- ----------------- ----------- -------------
+Maryellen                                          2003-04-19 Automotive        115973      115973
+Archibold                                          2003-04-26 Automotive        69379       185352
+Tabb                                               2003-05-02 Automotive        47591       232943
+Abbott                                             2003-06-05 Automotive        106517      339460
+Ladonna                                            2003-08-10 Automotive        111775      451235
+Roslyn                                             2003-08-11 Automotive        157260      608495
+Lorelle                                            2004-01-27 Automotive        119959      728454
+Cybil                                              2004-04-01 Automotive        123828      852282
+Sterling                                           2004-09-02 Automotive        56095       908377
+Jessalyn                                           2004-10-03 Automotive        86929       995306
+
+...
+
+
+
+Stormy                                             2015-07-28 Automotive        126983      3032023
+Charis                                             2015-08-14 Automotive        130995      3163018
+Cy                                                 2016-01-18 Automotive        144146      3307164
+Clementina                                         2016-09-04 Automotive        95492       3402656
+Cherianne                                          2016-12-18 Automotive        150821      3553477
+Cassandra                                          2003-01-01 Beauty            106936      106936
+Willabella                                         2003-08-18 Beauty            22053       128989
+Olenolin                                           2004-09-29 Beauty            137691      266680
+Lukas                                              2004-11-03 Beauty            63076       329756
+
+
+
+
+
+
+**********************************************************************************************************************
+
+
+############################# ############################# ############################# 
+-- Task 5
+-- Aggregate Window Functions - Part Two
+############################# ############################# #############################
+
+
+-- 5.1
+-- COUNT Multiple PARTITION BY 
+-- Retrieve the first names, department and
+-- number of employees working in that department and region
+
+SELECT first_name,
+	department,
+	region_id,
+	COUNT(*) OVER (PARTITION BY department) AS dept_count,
+	COUNT(*) OVER (PARTITION BY region_id) AS region_count
+FROM employees;
+
+
+**********************************************************************************************************************
+
+
+
+
+first_name                                         department        region_id   dept_count  region_count
+-------------------------------------------------- ----------------- ----------- ----------- ------------
+Roslyn                                             Automotive        1           32          152
+Irita                                              Automotive        1           32          152
+Doe                                                Automotive        1           32          152
+Clementina                                         Automotive        1           32          152
+Cybil                                              Automotive        1           32          152
+Chrissy                                            Automotive        1           32          152
+Merlina                                            Automotive        1           32          152
+Eldredge                                           Beauty            1           45          152
+Garrot                                             Beauty            1           45          152
+Maurita                                            Beauty            1           45          152
+
+
+
+
+
+**********************************************************************************************************************
+
+-- 5.2
+-- COUNT PARTITION WHERE
+-- Retrieve the first names, department and number of 
+-- employees working in that department and in region 2
+
+SELECT first_name,
+	department,
+	region_id,
+	COUNT(*) OVER (PARTITION BY region_id)AS region_count
+FROM employees
+WHERE region_id = 2;
+
+
+
+**********************************************************************************************************************
+
+
+
+
+
+first_name                                         department        region_id   region_count
+-------------------------------------------------- ----------------- ----------- ------------
+Jodi                                               Tools             2           141
+Emanuele                                           Garden            2           141
+Maurise                                            Pharmacy          2           141
+Norine                                             Sports            2           141
+Charla                                             Music             2           141
+Verney                                             Clothing          2           141
+Cindi                                              Games             2           141
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+
+-- 5.3:
+-- Calculate the cumulative sum of customers purchase for the different ship mode
+
+-- Common table expression to retrieve the customer_id,
+-- ship_mode, and how many times the customer has purchased from the mall
+WITH purchase_count AS
+	(SELECT customer_id,
+			ship_mode,
+			COUNT(sales) AS purchase
+		FROM sales
+		GROUP BY customer_id, ship_mode
+		ORDER BY purchase DESC) 
+		
+SELECT customer_id,
+	ship_mode,
+	purchase,
+	SUM(purchase) OVER (PARTITION BY ship_mode
+						ORDER BY customer_id ASC) AS sum_of_sales
+FROM purchase_count;
+
+**********************************************************************************************************************
+See CSV results
+**********************************************************************************************************************
+
+
+
+#############################
+-- Task 6
+-- Window Frames - Part One
+############################# 
+
+-- 6.1
+-- RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT
+-- Calculate the running total of salary
+
+SELECT first_name,
+	hire_date,
+	salary,
+	SUM(salary) OVER (ORDER BY hire_date 
+					  	RANGE BETWEEN 
+						UNBOUNDED PRECEDING 
+						AND CURRENT ROW) AS running_total
+FROM employees;
+
+
+
+**********************************************************************************************************************
+
+
+
+
+
+first_name                                         hire_date  salary      running_total
+-------------------------------------------------- ---------- ----------- -------------
+Norbie                                             2003-01-01 82215       189151
+Cassandra                                          2003-01-01 106936      189151
+Rora                                               2003-01-12 153489      342640
+Feliks                                             2003-01-14 55307       397947
+Cecilius                                           2003-01-20 98882       496829
+Eugenius                                           2003-01-26 152118      648947
+Fiorenze                                           2003-02-17 51266       700213
+Elnora                                             2003-02-22 34355       734568
+Chelsey                                            2003-02-24 57309       791877
+Dorothea                                           2003-02-27 46062       837939
+Yardley                                            2003-02-28 26876       864815
+Dayle                                              2003-03-01 82753       947568
+Bear                                               2003-03-02 143117      1090685
+
+...
+
+Roxie                                              2016-12-16 42224       91256185
+Cherianne                                          2016-12-18 150821      91407006
+Barby                                              2016-12-26 164588      91571594
+
+(1000 rows affected)
+
+
+
+
+**********************************************************************************************************************
+
+
+
+
+-- 6.2
+-- ROWS BETWEEN PRECEDING AND CURRENT ROW
+-- Add the current row and previous row
+
+SELECT first_name,
+	hire_date,
+	salary,
+	SUM (salary) OVER(ORDER BY hire_date 
+					  	ROWS BETWEEN 
+						1 PRECEDING 
+						AND CURRENT ROW) AS running_total
+FROM employees;
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+
+
+first_name                                         hire_date  salary      running_total
+-------------------------------------------------- ---------- ----------- -------------
+Norbie                                             2003-01-01 82215       82215
+Cassandra                                          2003-01-01 106936      189151
+Rora                                               2003-01-12 153489      260425
+Feliks                                             2003-01-14 55307       208796
+Cecilius                                           2003-01-20 98882       154189
+Eugenius                                           2003-01-26 152118      251000
+
+
+
+
+**********************************************************************************************************************
+
+
+
+
+-- 6.3 
+-- Current and past 2 row salary and takes the average (3 rows)
+-- Find the running average
+
+SELECT first_name,
+	hire_date,
+	salary,
+	ROUND(AVG(salary)OVER (ORDER BY hire_date 
+						   	ROWS BETWEEN 
+							2 PRECEDING 
+							AND CURRENT ROW),2) AS running_avg
+FROM employees;
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+
+
+first_name                                         hire_date  salary      running_avg
+-------------------------------------------------- ---------- ----------- -----------
+Norbie                                             2003-01-01 82215       82215
+Cassandra                                          2003-01-01 106936      94575
+Rora                                               2003-01-12 153489      114213
+Feliks                                             2003-01-14 55307       105244
+Cecilius                                           2003-01-20 98882       102559
+Eugenius                                           2003-01-26 152118      102102
+Fiorenze                                           2003-02-17 51266       100755
+Elnora                                             2003-02-22 34355       79246
+Chelsey                                            2003-02-24 57309       47643
+Dorothea                                           2003-02-27 46062       45908
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+
+############################# 
+-- Task 7
+-- Window Frames - Part Two
+############################# 
+
+-- 7.1
+-- FIRST_VALUE, LAST_VALUE
+-- Retrieve the FIRST and LAST department in the departments table
+
+SELECT department,
+	division,
+	FIRST_VALUE(department) OVER(ORDER BY department ASC) AS first_department, 
+	LAST_VALUE(department) OVER (ORDER BY department ASC 
+								 	RANGE BETWEEN 
+								 	UNBOUNDED PRECEDING 
+								 	AND UNBOUNDED FOLLOWING) AS last_department
+FROM departments;
+
+
+
+**********************************************************************************************************************
+
+
+
+
+department                                                                                           division                                                                                             first_department                                                                                     last_department
+---------------------------------------------------------------------------------------------------- ---------------------------------------------------------------------------------------------------- ---------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------
+Automotive                                                                                           Hardware                                                                                             Automotive                                                                                           Vitamins
+Beauty                                                                                               Fashion                                                                                              Automotive                                                                                           Vitamins
+Books                                                                                                Entertainment                                                                                        Automotive                                                                                           Vitamins
+
+
+
+
+
+**********************************************************************************************************************
+
+
+
+
+-- 7.2
+-- Retrieve running max and next running max from the total number of purchases
+-- customers have made at the mall
+
+WITH purchase_count AS
+	(SELECT customer_id,
+			count(sales) AS purchase
+		FROM sales
+		GROUP BY customer_id
+		ORDER BY purchase DESC)
+SELECT customer_id,
+	purchase,
+	ship_mode,
+	max(purchase) over(ORDER BY customer_id ASC) AS max_of_sales,
+	max(purchase) over(ORDER BY customer_id ASC 
+					   	ROWS BETWEEN 
+					   	CURRENT ROW AND 
+					   	1 FOLLOWING) AS next_max_of_sales
+FROM purchase_count;
+
+**********************************************************************************************************************
+See CSV results
+**********************************************************************************************************************
+
+
+############################# ############################# ############################# 
+
+
+-- Task 8
+-- GROUPING SETS, ROLLUP() & CUBE()
+-- Investigating shipping, sales, and financial data
+############################# ############################# ############################# 
+
+ 
+ 
+
+-- Find the sum of the quantity for different ship_mode, category and sub_category
+-- Find the grand total
+
+-- 8.1 
+-- GROUPING SETS
+
+
+SELECT ship_mode,
+	category,
+	sub_category,
+	SUM(quantity)
+FROM sales
+GROUP BY GROUPING
+SETS (ship_mode,
+		category,
+		sub_category, ());
+
+**********************************************************************************************************************
+See CSV results
+**********************************************************************************************************************
+		
+		
+-- 8.2  
+-- ROLLUP()
+
+SELECT ship_mode,
+	category,
+	sub_category,
+	SUM(quantity)
+FROM sales
+GROUP BY ROLLUP (ship_mode, category, sub_category);
+
+**********************************************************************************************************************
+See CSV results
+**********************************************************************************************************************
+
+
+-- 8.3 
+-- CUBE()
+
+SELECT ship_mode,
+	category,
+	sub_category,
+	SUM(quantity)
+FROM sales
+GROUP BY CUBE (ship_mode, category, sub_category);
+**********************************************************************************************************************
+See CSV results
+**********************************************************************************************************************
+
